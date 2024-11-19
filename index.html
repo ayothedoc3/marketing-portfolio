@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing Portfolio</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2d5a9e;
+            --accent-color: #64748b;
+            --background-color: #f8fafc;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: #333;
+        }
+
+        #login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        #content {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .case-study {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-container {
+            margin: 2rem 0;
+            height: 400px;
+        }
+
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--primary-color);
+        }
+
+        input {
+            padding: 0.5rem;
+            margin: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .metrics {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+        }
+
+        .testimonial {
+            font-style: italic;
+            background: #f3f4f6;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="login-screen">
+        <div class="login-container">
+            <h2>Marketing Portfolio Access</h2>
+            <input type="password" id="password" placeholder="Enter password">
+            <button onclick="checkPassword()">View Portfolio</button>
+        </div>
+    </div>
+
+    <div id="content">
+        <div class="header">
+            <h1>Digital Marketing Portfolio</h1>
+            <p>Specializing in Fintech & B2B Technology</p>
+        </div>
+
+        <div class="case-study">
+            <h2>Case Study: Fintech Lead Generation Campaign</h2>
+            <p>A comprehensive digital marketing campaign for a leading fintech startup</p>
+            
+            <div class="metrics">
+                <div class="metric-card">
+                    <h3>Lead Increase</h3>
+                    <h2>312%</h2>
+                </div>
+                <div class="metric-card">
+                    <h3>Closed Deals</h3>
+                    <h2>$2.1M</h2>
+                </div>
+                <div class="metric-card">
+                    <h3>CPA Reduction</h3>
+                    <h2>47%</h2>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="leadChart"></canvas>
+            </div>
+
+            <div class="testimonial">
+                "The strategic approach to digital marketing helped us exceed our lead generation goals by 3x while maintaining strict compliance requirements in the fintech space."
+                <br>- Marketing Director, Financial Technology Company
+            </div>
+        </div>
+
+        <div class="case-study">
+            <h2>Campaign Performance Metrics</h2>
+            <div class="chart-container">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Password protection
+        function checkPassword() {
+            const password = document.getElementById('password').value;
+            const correctHash = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'; // Password: admin
+            const inputHash = CryptoJS.SHA256(password).toString();
+            
+            if (inputHash === correctHash) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                initCharts();
+                // Record view
+                recordView();
+            } else {
+                alert('Incorrect password');
+            }
+        }
+
+        // Analytics tracking
+        function recordView() {
+            const viewDate = new Date().toISOString();
+            let views = JSON.parse(localStorage.getItem('portfolio_views') || '[]');
+            views.push(viewDate);
+            localStorage.setItem('portfolio_views', JSON.stringify(views));
+        }
+
+        // Charts initialization
+        function initCharts() {
+            // Lead Growth Chart
+            const leadCtx = document.getElementById('leadChart').getContext('2d');
+            new Chart(leadCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Month 1', 'Month 2', 'Month 3', 'Month 4', 'Month 5', 'Month 6'],
+                    datasets: [{
+                        label: 'Qualified Leads',
+                        data: [20, 45, 75, 120, 160, 187],
+                        borderColor: '#2d5a9e',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Lead Growth Over 6 Months'
+                        }
+                    }
+                }
+            });
+
+            // Performance Metrics Chart
+            const perfCtx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(perfCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['LinkedIn', 'Google Ads', 'Email', 'Meta Ads'],
+                    datasets: [{
+                        label: 'ROI by Channel',
+                        data: [467, 385, 290, 215],
+                        backgroundColor: '#64748b'
+                    }]      
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'ROI by Marketing Channel (%)'
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
